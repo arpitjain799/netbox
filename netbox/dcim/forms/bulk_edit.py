@@ -1175,6 +1175,14 @@ class InterfaceBulkEditForm(
         },
         label=_('LAG')
     )
+    vdcs = DynamicModelMultipleChoiceField(
+        queryset=VirtualDeviceContext.objects.all(),
+        required=False,
+        label='Virtual Device Contexts',
+        query_params={
+            'device_id': '$device',
+        }
+    )
     speed = forms.IntegerField(
         required=False,
         widget=SelectSpeedWidget(),
@@ -1240,14 +1248,14 @@ class InterfaceBulkEditForm(
     fieldsets = (
         (None, ('module', 'type', 'label', 'speed', 'duplex', 'description')),
         ('Addressing', ('vrf', 'mac_address', 'wwn')),
-        ('Operation', ('mtu', 'tx_power', 'enabled', 'mgmt_only', 'mark_connected')),
+        ('Operation', ('vdcs', 'mtu', 'tx_power', 'enabled', 'mgmt_only', 'mark_connected')),
         ('PoE', ('poe_mode', 'poe_type')),
         ('Related Interfaces', ('parent', 'bridge', 'lag')),
         ('802.1Q Switching', ('mode', 'vlan_group', 'untagged_vlan', 'tagged_vlans')),
         ('Wireless', ('rf_role', 'rf_channel', 'rf_channel_frequency', 'rf_channel_width')),
     )
     nullable_fields = (
-        'module', 'label', 'parent', 'bridge', 'lag', 'speed', 'duplex', 'mac_address', 'wwn', 'mtu', 'description',
+        'module', 'label', 'parent', 'bridge', 'lag', 'speed', 'duplex', 'mac_address', 'wwn', 'vdcs', 'mtu', 'description',
         'poe_mode', 'poe_type', 'mode', 'rf_channel', 'rf_channel_frequency', 'rf_channel_width', 'tx_power',
         'vlan_group', 'untagged_vlan', 'tagged_vlans', 'vrf',
     )
@@ -1316,6 +1324,11 @@ class FrontPortBulkEditForm(
     form_from_model(FrontPort, ['label', 'type', 'color', 'mark_connected', 'description']),
     ComponentBulkEditForm
 ):
+    mark_connected = forms.NullBooleanField(
+        required=False,
+        widget=BulkEditNullBooleanSelect
+    )
+
     model = FrontPort
     fieldsets = (
         (None, ('module', 'type', 'label', 'color', 'description', 'mark_connected')),
@@ -1327,6 +1340,11 @@ class RearPortBulkEditForm(
     form_from_model(RearPort, ['label', 'type', 'color', 'mark_connected', 'description']),
     ComponentBulkEditForm
 ):
+    mark_connected = forms.NullBooleanField(
+        required=False,
+        widget=BulkEditNullBooleanSelect
+    )
+
     model = RearPort
     fieldsets = (
         (None, ('module', 'type', 'label', 'color', 'description', 'mark_connected')),
