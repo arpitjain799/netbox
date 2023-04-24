@@ -387,6 +387,14 @@ class BulkImportView(GetReturnURLMixin, BaseMultiObjectView):
                 model_form_kwargs['headers'] = form._csv_headers  # Add CSV headers
             model_form = self.model_form(**model_form_kwargs)
 
+            # validate the fields (required fields are present and no unknown fields)
+            form_fields = model_form.fields
+            required_fields = [
+                name for name, field in form_fields.items() if field.required
+            ]
+            headers = list(record.keys())
+            validate_import_headers(headers, form_fields, required_fields)
+
             # When updating, omit all form fields other than those specified in the record. (No
             # fields are required when modifying an existing object.)
             if object_id:
@@ -417,7 +425,7 @@ class BulkImportView(GetReturnURLMixin, BaseMultiObjectView):
     #
 
     def get(self, request):
-        form = ImportForm(model_form=self.model_form)
+        form = ImportForm()
 
         return render(request, self.template_name, {
             'model': self.model_form._meta.model,
@@ -430,7 +438,7 @@ class BulkImportView(GetReturnURLMixin, BaseMultiObjectView):
     def post(self, request):
         logger = logging.getLogger('netbox.views.BulkImportView')
 
-        form = ImportForm(request.POST, request.FILES, model_form=self.model_form)
+        form = ImportForm(request.POST, request.FILES)
 
         if form.is_valid():
             logger.debug("Import form validation was successful")

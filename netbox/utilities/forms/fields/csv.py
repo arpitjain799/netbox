@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.utils.translation import gettext as _
 
 from utilities.choices import unpack_grouped_choices
-from utilities.forms.utils import parse_csv, validate_csv
+from utilities.forms.utils import parse_csv, validate_import_headers
 from utilities.utils import content_type_identifier
 
 __all__ = (
@@ -62,7 +62,7 @@ class CSVDataField(forms.CharField):
 
     def validate(self, value):
         headers, records = value
-        validate_csv(headers, self.fields, self.required_fields)
+        validate_import_headers(headers, self.fields, self.required_fields)
 
         return value
 
@@ -103,7 +103,7 @@ class CSVFileField(forms.FileField):
             return None
 
         headers, records = value
-        validate_csv(headers, self.fields, self.required_fields)
+        validate_import_headers(headers, self.fields, self.required_fields)
 
         return value
 

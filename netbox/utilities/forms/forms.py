@@ -8,7 +8,7 @@ from django import forms
 from django.utils.translation import gettext as _
 
 from utilities.choices import ImportFormatChoices
-from utilities.forms.utils import parse_csv, validate_csv
+from utilities.forms.utils import parse_csv
 from .widgets import APISelect, APISelectMultiple, ClearableFileInput, StaticSelect
 
 __all__ = (
@@ -169,11 +169,6 @@ class ImportForm(BootstrapMixin, forms.Form):
         widget=StaticSelect()
     )
     data_field = 'data'
-    model_form = None
-
-    def __init__(self, *args, **kwargs):
-        self.model_form = kwargs.pop("model_form", None)
-        super().__init__(*args, **kwargs)
 
     def clean(self):
         super().clean()
@@ -229,13 +224,6 @@ class ImportForm(BootstrapMixin, forms.Form):
         stream = StringIO(data.strip())
         reader = csv.reader(stream)
         headers, records = parse_csv(reader)
-
-        if self.model_form:
-            form_fields = self.model_form().fields
-            required_fields = [
-                name for name, field in form_fields.items() if field.required
-            ]
-            validate_csv(headers, form_fields, required_fields)
 
         # Set CSV headers for reference by the model form
         self._csv_headers = headers
